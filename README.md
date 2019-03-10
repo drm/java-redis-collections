@@ -13,6 +13,9 @@ Store your collections in Redis and make your application resumable and stateful
 * `nl.melp.redis.collections.ByteArrayList` - a List and Deque implementation that stores raw byte values as a Redis list;
 * `nl.melp.redis.collections.ByteArrayList` - a List and Deque implementation that serializes and deserializes objects, 
   backed by the ByteArrayList;
+* `nl.melp.redis.collections.BlockingByteArrayDeque` - a Deque implementation based on `ByteArrayList` that does blocking reads with `BRPOP` and `BLPOP`.
+* `nl.melp.redis.collections.SerializedBlockingDeque` - a Deque implementation that serializes and deserializes objects, 
+  backed by the BlockingByteArrayDeque;
 
 ## Usage
 

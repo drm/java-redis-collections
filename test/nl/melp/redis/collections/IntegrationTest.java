@@ -1,14 +1,14 @@
 package nl.melp.redis.collections;
 
 import nl.melp.redis.Redis;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.net.UnknownHostException;
+import java.util.*;
+import java.util.concurrent.*;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -157,5 +157,51 @@ public class IntegrationTest {
 		}
 
 		clear();
+	}
+
+	@Test
+	public void testBlockinDeque() throws IOException, InterruptedException {
+		List<String> results = new LinkedList<>();
+		Runnable listener = () -> {
+			try (Socket s = new Socket("localhost", 6379)) {
+				Deque<String> q = new SerializedBlockingDeque<>(new Redis(s), keyName, 1);
+				results.add(q.remove());
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
+		};
+
+		clear();
+		try (Socket socket = new Socket("localhost", 6379)) {
+			SerializedList<String> input = new SerializedList<>(new Redis(socket), keyName);
+
+			input.add("1");
+			input.add("2");
+			input.add("3");
+			ScheduledExecutorService pool = Executors.newScheduledThreadPool(3);
+
+			List<Future> futures = new LinkedList<>();
+
+			futures.add(pool.schedule(listener, 100, TimeUnit.MILLISECONDS));
+			futures.add(pool.schedule(listener, 200, TimeUnit.MILLISECONDS));
+			futures.add(pool.schedule(listener, 300, TimeUnit.MILLISECONDS));
+
+			futures.forEach(future -> {
+				try {
+					future.get();
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				}
+			});
+
+			assertTrue(results.contains("1"));
+			assertTrue(results.contains("2"));
+			assertTrue(results.contains("3"));
+
+			assertEquals(3, results.size());
+			assertEquals(0, input.size());
+		}
 	}
 }

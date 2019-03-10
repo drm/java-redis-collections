@@ -17,6 +17,9 @@ public class Serializer<V extends Serializable> implements ISerializer<V> {
 
 	@Override
 	public V deserialize(byte[] v) {
+		if (v == null) {
+			return null;
+		}
 		ByteArrayInputStream buf = new ByteArrayInputStream(v);
 		try {
 			return (V) new ObjectInputStream(buf).readObject();

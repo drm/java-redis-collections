@@ -10,9 +10,13 @@ public class SerializedList<V extends Serializable> implements List<V>, Deque<V>
 	private final ISerializer<V> serializer;
 	private final ByteArrayList innerList;
 
-	public SerializedList(ISerializer<V> serializer, Redis redis, String keyName) {
+	protected SerializedList(ISerializer<V> serializer, Redis redis, String keyName, ByteArrayList innerList) {
 		this.serializer = serializer;
-		this.innerList = new ByteArrayList(redis, keyName);
+		this.innerList = innerList;
+	}
+
+	public SerializedList(ISerializer<V> serializer, Redis redis, String keyName) {
+		this(serializer, redis, keyName, new ByteArrayList(redis, keyName));
 	}
 
 	public SerializedList(Redis redis, String keyName) {
