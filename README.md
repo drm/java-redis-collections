@@ -19,8 +19,7 @@ Store your collections in Redis and make your application resumable and stateful
 
 ## Usage
 
-You will need a recent version (> 2.0.1) of https://github.com/drm/java-redis-client. Using
-that library you can 
+You will only need a recent version (> 2.0.1) of https://github.com/drm/java-redis-client. 
 
 Otherwise there are no dependencies, but java >= 8.
 
