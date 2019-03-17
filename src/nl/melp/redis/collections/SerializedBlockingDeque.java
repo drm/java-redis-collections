@@ -10,6 +10,6 @@ public class SerializedBlockingDeque<V extends Serializable> extends SerializedL
 	}
 
 	public SerializedBlockingDeque(Redis redis, String keyName, int timeoutSecs) {
-		this(new Serializer<V>(), redis, keyName, timeoutSecs);
+		this(new Serializer.DefaultSerializer<V>(), redis, keyName, timeoutSecs);
 	}
 }

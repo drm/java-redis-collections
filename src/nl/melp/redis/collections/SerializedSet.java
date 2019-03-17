@@ -15,7 +15,7 @@ public class SerializedSet<V extends Serializable> implements Set<V>, Collection
 	private final ISerializer<V> serializer;
 
 	public SerializedSet(Redis redis, String keyName) {
-		this(new Serializer<>(), redis, keyName);
+		this(new Serializer.DefaultSerializer<>(), redis, keyName);
 	}
 
 	public SerializedSet(ISerializer<V> serializer, Redis redis, String keyName) {

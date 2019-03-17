@@ -15,7 +15,7 @@ public class SerializedHashMap<K extends Serializable, V extends Serializable> i
 	private final ISerializer<V> valueSerializer;
 
 	public SerializedHashMap(Redis redis, String keyName) {
-		this(new Serializer<>(), new Serializer<>(), redis, keyName);
+		this(new Serializer.DefaultSerializer<>(), new Serializer.DefaultSerializer<>(), redis, keyName);
 	}
 
 	public SerializedHashMap(ISerializer<K> keySerializer, ISerializer<V> valueSerializer, Redis redis, String keyName) {

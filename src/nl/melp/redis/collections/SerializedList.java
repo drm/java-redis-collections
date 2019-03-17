@@ -20,7 +20,7 @@ public class SerializedList<V extends Serializable> implements List<V>, Deque<V>
 	}
 
 	public SerializedList(Redis redis, String keyName) {
-		this(new Serializer<>(), redis, keyName);
+		this(new Serializer.DefaultSerializer<>(), redis, keyName);
 	}
 
 	@Override
