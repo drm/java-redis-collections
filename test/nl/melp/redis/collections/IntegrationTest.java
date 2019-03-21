@@ -11,8 +11,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class IntegrationTest {
 	private final String keyName = IntegrationTest.class.getCanonicalName();
@@ -202,6 +201,29 @@ public class IntegrationTest {
 
 			assertEquals(3, results.size());
 			assertEquals(0, input.size());
+		}
+	}
+
+	@Test
+	public void testSerializedMappedSet() throws IOException {
+		try (Socket s = new Socket("localhost", 6379)) {
+			Redis redis = new Redis(s);
+
+			Map<String, Set<String>> values = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, "myset");
+			Map<String, Set<String>> secondary = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, "myset");
+
+			assertFalse(values.get("foo").contains("bar"));
+			values.get("foo").add("bar");
+			assertTrue(values.get("foo").contains("bar"));
+			assertTrue(secondary.get("foo").contains("bar"));
+			values.get("foo").remove("bar");
+			assertEquals(1, values.size());
+			assertEquals(1, secondary.size());
+			values.clear();
+			assertEquals(0, values.size());
+			assertEquals(0, secondary.size());
+			assertFalse(values.get("foo").contains("bar"));
+			assertFalse(secondary.get("foo").contains("bar"));
 		}
 	}
 }

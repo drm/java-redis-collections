@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SerializedSet<V extends Serializable> implements Set<V>, Collection<V> {
+public class SerializedSet<V> implements Set<V>, Collection<V> {
 	private final ByteArraySet innerSet;
 	private final ISerializer<V> serializer;
 
@@ -46,8 +46,6 @@ public class SerializedSet<V extends Serializable> implements Set<V>, Collection
 	@Override
 	public Object[] toArray() {
 		throw new UnsupportedOperationException("Not implemented");
-//		return null;
-//		return Arrays.stream((byte[])innerSet.toArray()).map((k) -> serializer.deserialize(k)).toArray(Object[]::new);
 	}
 
 	@Override

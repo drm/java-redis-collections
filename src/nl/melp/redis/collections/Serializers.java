@@ -6,6 +6,7 @@ import java.util.Map;
 
 public class Serializers {
 	private static Map<Class, Class> serializers = new HashMap<>();
+
 	static {
 		serializers.put(Integer.class, Serializer.IntegerSerializer.class);
 		serializers.put(Long.class, Serializer.LongSerializer.class);
@@ -21,6 +22,6 @@ public class Serializers {
 				throw new RuntimeException(e);
 			}
 		}
-		return new Serializer.DefaultSerializer();
+		return new Serializer.DefaultSerializer<>();
 	}
 }

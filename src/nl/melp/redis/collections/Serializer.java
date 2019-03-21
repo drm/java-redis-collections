@@ -4,9 +4,9 @@ import java.io.*;
 import java.nio.charset.Charset;
 
 public class Serializer {
-	public static class DefaultSerializer<V extends Serializable> implements ISerializer<V> {
+	public static class DefaultSerializer<V> implements ISerializer<V> {
 		@Override
-		public byte[] serialize(Serializable v) {
+		public byte[] serialize(V v) {
 			ByteArrayOutputStream buf = new ByteArrayOutputStream();
 			try {
 				new ObjectOutputStream(buf).writeObject(v);
@@ -19,9 +19,6 @@ public class Serializer {
 
 		@Override
 		public V deserialize(byte[] v) {
-			if (v == null) {
-				return null;
-			}
 			ByteArrayInputStream buf = new ByteArrayInputStream(v);
 			try {
 				return (V) new ObjectInputStream(buf).readObject();
