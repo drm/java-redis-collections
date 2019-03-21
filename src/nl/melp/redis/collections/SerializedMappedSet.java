@@ -3,10 +3,8 @@ package nl.melp.redis.collections;
 import nl.melp.redis.Redis;
 
 import java.io.IOException;
+import java.util.*;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 	private final byte[] prefix;
@@ -16,6 +14,7 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 	private final ISerializer<K> keySerializer;
 	private final Redis redis;
 	private final SerializedSet<K> keys;
+	private Map<K, Set<V>> cache;
 
 	public SerializedMappedSet(ISerializer<K> keySerializer, ISerializer<V> valueSerializer, Redis redis, String prefix) {
 		this.redis = redis;
@@ -26,6 +25,7 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 		this.prefixLength = this.prefix.length;
 
 		this.keys = new SerializedSet<K>(keySerializer, redis, new String(this.withPrefix("_keys".getBytes())));
+		this.cache = new HashMap<>();
 	}
 
 
@@ -72,10 +72,15 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 	@Override
 	public Set<V> get(Object o) {
 		synchronized (redis) {
-			if (!this.keys.contains(o)) {
-				this.keys.add((K)o);
+			K key = (K)o;
+
+			if (!this.keys.contains(key)) {
+				this.keys.add(key);
 			}
-			return new SerializedSet<>(this.valueSerializer, this.redis, new String(this.keySerializer.serialize((K)o)));
+			if (!this.cache.containsKey(key)) {
+				this.cache.put(key, new SerializedSet<>(this.valueSerializer, this.redis, new String(this.withPrefix(this.keySerializer.serialize(key)))));
+			}
+			return this.cache.get(o);
 		}
 	}
 
