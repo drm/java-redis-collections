@@ -10,8 +10,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class IntegrationTest {
 	private final String keyName = IntegrationTest.class.getCanonicalName();
@@ -83,11 +82,31 @@ public class IntegrationTest {
 	}
 
 	@Test
-	public void testSet() throws IOException {
+	public void testSet() throws Exception {
 		clear();
 
 		try (Socket socket = new Socket("localhost", 6379)) {
 			ByteArraySet t = new ByteArraySet(new Redis(socket), keyName);
+
+			Iterator<byte[]> iterator = t.iterator();
+			assertFalse(iterator.hasNext());
+			assertFalse(iterator.hasNext());
+			assertNull(iterator.next());
+
+			// test empty set iteration
+			for (byte[] b : t) {
+				throw new Exception("Should be empty");
+			}
+
+			assertEquals(0, t.size());
+			t.add("Hello".getBytes());
+			assertEquals(1, t.size());
+
+			// test single item iteration
+			for (byte[] b : t) {
+				assertEquals(new String(b), "Hello");
+			}
+			t.clear();
 
 			assertEquals(0, t.size());
 			t.add("Val1".getBytes());

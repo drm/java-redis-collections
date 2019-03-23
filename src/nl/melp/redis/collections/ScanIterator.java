@@ -31,7 +31,10 @@ public class ScanIterator implements Iterator<byte[]> {
 				return false;
 			}
 			try {
-				List<Object> result = redis.call(this.operation, this.keyName, Integer.toString(this.cursor));
+				List<Object> result;
+				synchronized (redis) {
+					result = redis.call(this.operation, this.keyName, Integer.toString(this.cursor));
+				}
 				this.cursor = Integer.valueOf(new String((byte[]) result.get(0)));
 				this.buffer = (List<byte[]>) result.get(1);
 				this.localCursor = 0;
