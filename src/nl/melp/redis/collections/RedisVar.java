@@ -5,8 +5,8 @@ import nl.melp.redis.Redis;
 import java.io.IOException;
 
 abstract class RedisVar {
-	private final Redis redis;
-	private final byte[] keyName;
+	final Redis redis;
+	final byte[] keyName;
 
 	RedisVar(Redis redis, String keyName) {
 		this.redis = redis;

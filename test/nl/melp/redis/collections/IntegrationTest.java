@@ -6,12 +6,12 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.*;
 
 import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class IntegrationTest {
 	private final String keyName = IntegrationTest.class.getCanonicalName();
@@ -102,19 +102,19 @@ public class IntegrationTest {
 			t.clear();
 			assertEquals(0, t.size());
 
-			t.add("1".getBytes());
-			t.add("2".getBytes());
-			t.add("3".getBytes());
-			t.add("4".getBytes());
-			t.add("5".getBytes());
+			Set<String> s = new HashSet<>();
+			for (int i = 0; i < 1000; i ++) {
+				String str = Integer.toString(i);
+				s.add(str);
+				t.add(str.getBytes());
+			}
 
 			List<String> l = new LinkedList<>();
 			for (byte[] b : t) {
 				l.add(new String(b));
 			}
-			l.sort(Comparator.naturalOrder());
-
-			assertEquals("12345", String.join("", l));
+			assertTrue(s.containsAll(l));
+			assertEquals(s.size(), l.size());
 		}
 
 		clear();
@@ -159,7 +159,7 @@ public class IntegrationTest {
 	}
 
 	@Test
-	public void testBlockinDeque() throws IOException, InterruptedException {
+	public void testBlockinDeque() throws IOException {
 		List<String> results = new LinkedList<>();
 		Runnable listener = () -> {
 			try (Socket s = new Socket("localhost", 6379)) {
@@ -209,8 +209,8 @@ public class IntegrationTest {
 		try (Socket s = new Socket("localhost", 6379)) {
 			Redis redis = new Redis(s);
 
-			Map<String, Set<String>> values = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, "myset");
-			Map<String, Set<String>> secondary = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, "myset");
+			Map<String, Set<String>> values = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, keyName);
+			Map<String, Set<String>> secondary = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, keyName);
 
 			assertFalse(values.get("foo").contains("bar"));
 			values.get("foo").add("bar");
@@ -225,5 +225,7 @@ public class IntegrationTest {
 			assertFalse(values.get("foo").contains("bar"));
 			assertFalse(secondary.get("foo").contains("bar"));
 		}
+
+		clear();
 	}
 }

@@ -13,7 +13,7 @@ public class ByteArraySet extends Collection<byte[]> implements Set<byte[]> {
 
 	@Override
 	public Iterator<byte[]> iterator() {
-		return this.<List<byte[]>>call("SMEMBERS").iterator();
+		return new ScanIterator(this.redis, "SSCAN".getBytes(), keyName);
 	}
 
 	@Override

@@ -16,6 +16,20 @@ Store your collections in Redis and make your application resumable and stateful
 * `nl.melp.redis.collections.BlockingByteArrayDeque` - a Deque implementation based on `ByteArrayList` that does blocking reads with `BRPOP` and `BLPOP`.
 * `nl.melp.redis.collections.SerializedBlockingDeque` - a Deque implementation that serializes and deserializes objects, 
   backed by the BlockingByteArrayDeque;
+* `nl.melp.redis.collections.SerializedMappedSet` - a `Map<K, Set<V>>` implementation, backed by SerializedSet.
+  
+## Serialization
+
+Serialization can be done by using either the `nl.melp.redis.collections.Serializers.DefaultSerializer` which
+assumes the objects implement `Serializable` and utilizes ObjectOutputStream and ObjectInputStream.
+
+For `String`, `Long` and `Integer`, type-specific serializers are available. You can use the factory method
+`nl.melp.redis.collections.Serializers.of(...)` for this, or you can instantiate the relevant implementation.
+These implementations simply encode and decode directly to byte arrays.
+
+Of course, you can easily implement custom serialization such as JSON or similar.
+ 
+See [my link checker](https://github.com/drm/java-linkchecker) for an example of how to utilize this library.
 
 ## Usage
 
