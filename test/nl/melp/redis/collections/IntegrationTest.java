@@ -243,6 +243,18 @@ public class IntegrationTest {
 			assertEquals(0, secondary.size());
 			assertFalse(values.get("foo").contains("bar"));
 			assertFalse(secondary.get("foo").contains("bar"));
+
+			values.get("A").add("1");
+			values.get("A").add("2");
+			values.get("A").add("3");
+			values.get("B").add("1");
+			values.get("B").add("2");
+			values.get("B").add("3");
+
+			var l = new ArrayList<String>();
+			for (var e : values.entrySet()) {
+				l.add(e.getKey() + "." + e.getValue());
+			}
 		}
 
 		clear();

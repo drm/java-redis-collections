@@ -130,6 +130,25 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 
 	@Override
 	public Set<Entry<K, Set<V>>> entrySet() {
-		throw new UnsupportedOperationException();
+		Set<Entry<K, Set<V>>> set = new HashSet<>();
+		for (K k : keySet()) {
+			set.add(new Entry<>() {
+				@Override
+				public K getKey() {
+					return k;
+				}
+
+				@Override
+				public Set<V> getValue() {
+					return get(k);
+				}
+
+				@Override
+				public Set<V> setValue(Set<V> o) {
+					throw new UnsupportedOperationException("Not implemented");
+				}
+			});
+		}
+		return set;
 	}
 }
