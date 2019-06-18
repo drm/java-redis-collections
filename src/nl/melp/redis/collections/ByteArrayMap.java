@@ -75,7 +75,7 @@ public class ByteArrayMap extends RedisVar implements Map<byte[], byte[]> {
 	public Set<Entry<byte[], byte[]>> entrySet() {
 		Set<Entry<byte[], byte[]>> set = new HashSet<>();
 		for (byte[] k : keySet()) {
-			set.add(new Entry<>() {
+			set.add(new Entry<byte[], byte[]>() {
 				@Override
 				public byte[] getKey() {
 					return k;

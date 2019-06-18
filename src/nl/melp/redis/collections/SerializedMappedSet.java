@@ -132,7 +132,7 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 	public Set<Entry<K, Set<V>>> entrySet() {
 		Set<Entry<K, Set<V>>> set = new HashSet<>();
 		for (K k : keySet()) {
-			set.add(new Entry<>() {
+			set.add(new Entry<K, Set<V>>() {
 				@Override
 				public K getKey() {
 					return k;

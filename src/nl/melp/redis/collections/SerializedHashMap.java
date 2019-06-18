@@ -82,7 +82,7 @@ public class SerializedHashMap<K extends Serializable, V extends Serializable> i
 	public Set<Entry<K, V>> entrySet() {
 		Set<Entry<K, V>> set = new HashSet<>();
 		for (K k : keySet()) {
-			set.add(new Entry<>() {
+			set.add(new Entry<K, V>() {
 				@Override
 				public K getKey() {
 					return k;

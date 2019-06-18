@@ -66,7 +66,7 @@ public class SerializedSet<V> implements Set<V>, Collection<V> {
 	@Override
 	public Iterator<V> iterator() {
 		Iterator<byte[]> innerIterator = innerSet.iterator();
-		return new Iterator<>() {
+		return new Iterator<V>() {
 			@Override
 			public boolean hasNext() {
 				return innerIterator.hasNext();

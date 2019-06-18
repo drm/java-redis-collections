@@ -230,6 +230,7 @@ public class IntegrationTest {
 
 			Map<String, Set<String>> values = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, keyName);
 			Map<String, Set<String>> secondary = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, keyName);
+			values.clear();
 
 			assertFalse(values.get("foo").contains("bar"));
 			values.get("foo").add("bar");
@@ -251,8 +252,8 @@ public class IntegrationTest {
 			values.get("B").add("2");
 			values.get("B").add("3");
 
-			var l = new ArrayList<String>();
-			for (var e : values.entrySet()) {
+			List<String> l = new ArrayList<>();
+			for (Map.Entry<String, Set<String>> e : values.entrySet()) {
 				l.add(e.getKey() + "." + e.getValue());
 			}
 		}
