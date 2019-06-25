@@ -7,6 +7,9 @@ public class Serializer {
 	public static class DefaultSerializer<V> implements ISerializer<V> {
 		@Override
 		public byte[] serialize(V v) {
+			if (v == null) {
+				return null;
+			}
 			ByteArrayOutputStream buf = new ByteArrayOutputStream();
 			try {
 				new ObjectOutputStream(buf).writeObject(v);
@@ -19,6 +22,9 @@ public class Serializer {
 
 		@Override
 		public V deserialize(byte[] v) {
+			if (v == null) {
+				return null;
+			}
 			ByteArrayInputStream buf = new ByteArrayInputStream(v);
 			try {
 				return (V) new ObjectInputStream(buf).readObject();
@@ -55,6 +61,9 @@ public class Serializer {
 	public static class LongSerializer implements ISerializer<Long> {
 		@Override
 		public byte[] serialize(Long v) {
+			if (v == null) {
+				return null;
+			}
 			long unboxed = v;
 			byte[] result = new byte[Long.BYTES];
 			for (int i = Long.BYTES -1; i >= 0; i--) {
@@ -66,6 +75,9 @@ public class Serializer {
 
 		@Override
 		public Long deserialize(byte[] b) {
+			if (b == null) {
+				return null;
+			}
 			long result = 0;
 			for (int i = 0; i < Long.BYTES; i++) {
 				result <<= 8;
@@ -78,6 +90,9 @@ public class Serializer {
 	public static class IntegerSerializer implements ISerializer<Integer> {
 		@Override
 		public byte[] serialize(Integer v) {
+			if (v == null) {
+				return null;
+			}
 			int unboxed = v;
 			byte[] result = new byte[Integer.BYTES];
 			for (int i = result.length -1; i >= 0; i--) {
@@ -89,6 +104,9 @@ public class Serializer {
 
 		@Override
 		public Integer deserialize(byte[] b) {
+			if (b == null) {
+				return null;
+			}
 			int result = 0;
 			for (int i = 0; i < Integer.BYTES; i++) {
 				result <<= 8;
