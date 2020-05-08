@@ -24,7 +24,7 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 		this.prefix = prefix.getBytes();
 		this.prefixLength = this.prefix.length;
 
-		this.keys = new SerializedSet<K>(keySerializer, redis, new String(this.withPrefix("_keys".getBytes())));
+		this.keys = new SerializedSet<>(keySerializer, redis, new String(this.withPrefix("_keys".getBytes())));
 		this.cache = new HashMap<>();
 	}
 
@@ -111,8 +111,8 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 	@Override
 	public void clear() {
 		synchronized (redis) {
-			for (K key : keys) {
-				call("DEL", keySerializer.serialize(key));
+			for (K key : this.cache.keySet()) {
+				call("DEL", this.withPrefix(this.keySerializer.serialize(key)));
 			}
 			keys.clear();
 		}

@@ -44,6 +44,10 @@ public class IntegrationTest {
 			s.push("A".getBytes());
 			s.push("B".getBytes());
 			assertEquals("A", new String(s.get(0)));
+
+			s.clear();
+			assertEquals(0, s.size());
+			assertTrue(s.isEmpty());
 		}
 	}
 
@@ -172,6 +176,10 @@ public class IntegrationTest {
 			l.sort(Comparator.naturalOrder());
 
 			assertEquals("12345", String.join("", l));
+
+			t.clear();
+			assertEquals(0, t.size());
+			assertTrue(t.isEmpty());
 		}
 
 		clear();
@@ -256,6 +264,15 @@ public class IntegrationTest {
 			for (Map.Entry<String, Set<String>> e : values.entrySet()) {
 				l.add(e.getKey() + "." + e.getValue());
 			}
+
+			assertFalse(values.isEmpty());
+
+			values.clear();
+			assertEquals(0, values.size());
+			assertTrue(values.isEmpty());
+
+			assertEquals(0, secondary.size());
+			assertTrue(secondary.isEmpty());
 		}
 
 		clear();
