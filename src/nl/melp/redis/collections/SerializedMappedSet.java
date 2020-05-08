@@ -112,7 +112,7 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 	public void clear() {
 		synchronized (redis) {
 			for (K key : keys) {
-				call("DEL", this.withPrefix(this.keySerializer.serialize(key)));
+				this.get(key).clear();
 			}
 			keys.clear();
 		}
