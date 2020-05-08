@@ -2,6 +2,8 @@ package nl.melp.redis.collections;
 
 import nl.melp.redis.Redis;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -14,6 +16,12 @@ import static org.junit.Assert.*;
 
 public class IntegrationTest {
 	private final String keyName = IntegrationTest.class.getCanonicalName();
+	private static Redis redis;
+
+	@BeforeClass
+	public static void init() {
+		redis =
+	}
 
 	private void clear() {
 		try {
