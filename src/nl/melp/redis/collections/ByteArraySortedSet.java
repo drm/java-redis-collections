@@ -2,11 +2,13 @@ package nl.melp.redis.collections;
 
 import nl.melp.redis.Redis;
 
+import java.io.IOException;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 // NX: Don't update already existing elements. Always add new elements.
 public class ByteArraySortedSet extends Collection<byte[]> implements Set<byte[]>, Queue<byte[]> {
@@ -16,7 +18,19 @@ public class ByteArraySortedSet extends Collection<byte[]> implements Set<byte[]
 
 	@Override
 	public Iterator<byte[]> iterator() {
-		return new ZScanIterator(this.redis, "ZSCAN".getBytes(), keyName);
+		AtomicInteger i = new AtomicInteger(0);
+		return new Iterator<byte[]>() {
+			@Override
+			public boolean hasNext() {
+				return i.get() < size();
+			}
+
+			@Override
+			public byte[] next() {
+				final String offset = Integer.toString(i.getAndIncrement());
+				return ByteArraySortedSet.this.<List<byte[]>>call("ZRANGE", offset, offset).get(0);
+			}
+		};
 	}
 
 	@Override

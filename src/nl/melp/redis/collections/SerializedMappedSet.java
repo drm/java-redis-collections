@@ -74,9 +74,7 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 		synchronized (redis) {
 			K key = (K)o;
 
-			if (!this.keys.contains(key)) {
-				this.keys.add(key);
-			}
+			this.keys.add(key);
 			if (!this.cache.containsKey(key)) {
 				this.cache.put(key, new SerializedSet<>(this.valueSerializer, this.redis, new String(this.withPrefix(this.keySerializer.serialize(key)))));
 			}
