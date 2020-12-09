@@ -19,6 +19,14 @@ public class IntegrationTest {
 	private Redis redis;
 	private Socket socket;
 
+	@Test
+	public void tmp () throws IOException {
+		redis.call("SELECT", "0");
+		System.out.println(
+			new SerializedHashMap<>(redis, "nl.melp.linkchecker.LinkChecker.report.statuses").keySet().size()
+		);
+	}
+
 	@Before
 	public void init() throws IOException {
 		socket = new Socket("localhost", 6379);
@@ -120,9 +128,9 @@ public class IntegrationTest {
 		assertEquals(2, t.size());
 		assertTrue(t.contains("Val1".getBytes()));
 		assertTrue(t.contains("Val2".getBytes()));
-		assertTrue(!t.contains("Val3".getBytes()));
+		assertFalse(t.contains("Val3".getBytes()));
 		assertTrue(t.remove("Val1".getBytes()));
-		assertTrue(!t.remove("Val1".getBytes()));
+		assertFalse(t.remove("Val1".getBytes()));
 		t.clear();
 		assertEquals(0, t.size());
 
@@ -144,8 +152,8 @@ public class IntegrationTest {
 	}
 
 	@Test
-	public void testSerializedSet() throws IOException {
-		SerializedSet<String> t = new SerializedSet<String>(redis, keyName);
+	public void testSerializedSet() {
+		SerializedSet<String> t = new SerializedSet<>(redis, keyName);
 
 		assertEquals(0, t.size());
 		t.add("Val1");
@@ -180,7 +188,46 @@ public class IntegrationTest {
 	}
 
 	@Test
-	public void testBlockinDeque() throws IOException {
+	public void testSerializedSortedSet() {
+		SerializedSortedSet<String> t = new SerializedSortedSet<>(redis, keyName);
+
+		assertEquals(0, t.size());
+		t.add("Val1");
+		t.add("Val2");
+		t.add("Val2");
+		assertEquals(2, t.size());
+		assertTrue(t.contains("Val1"));
+		assertTrue(t.contains("Val2"));
+		assertTrue(!t.contains("Val3"));
+		assertTrue(t.remove("Val1"));
+		assertTrue(!t.remove("Val1"));
+		t.clear();
+		assertEquals(0, t.size());
+
+		t.add("1");
+		t.add("2");
+		t.add("3");
+		t.add("4");
+		t.add("5");
+
+		List<String> l = new LinkedList<>();
+		for (String b : t) {
+			l.add(b);
+		}
+
+		String b;
+		while (null != (b = t.remove())) {
+			l.add(b);
+		}
+
+		assertEquals("1234512345", String.join("", l));
+
+		assertEquals(0, t.size());
+		assertTrue(t.isEmpty());
+	}
+
+	@Test
+	public void testBlockinDeque() {
 		List<String> results = new LinkedList<>();
 		Runnable listener = () -> {
 			Deque<String> q = new SerializedBlockingDeque<>(redis, keyName, 1);

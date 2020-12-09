@@ -28,7 +28,7 @@ public class ByteArraySet extends Collection<byte[]> implements Set<byte[]> {
 
 	@Override
 	public boolean addAll(java.util.Collection<? extends byte[]> collection) {
-		return this.<Long>call("SADD", collection.toArray(new byte[0][])) > 0;
+		return this.<Long>call("SADD", collection.toArray(new Object[0])) > 0;
 	}
 
 	@Override
@@ -43,11 +43,11 @@ public class ByteArraySet extends Collection<byte[]> implements Set<byte[]> {
 
 	@Override
 	public boolean contains(Object o) {
-		return this.<Long>call("SISMEMBER", (byte[]) o) > 0;
+		return this.<Long>call("SISMEMBER", o) > 0;
 	}
 
 	@Override
 	public boolean remove(Object o) {
-		return this.<Long>call("SREM", (byte[]) o) > 0;
+		return this.<Long>call("SREM", o) > 0;
 	}
 }

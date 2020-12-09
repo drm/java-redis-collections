@@ -11,8 +11,8 @@ public class ScanIterator implements Iterator<byte[]> {
 	private final byte[] operation;
 	private final byte[] keyName;
 	private int cursor;
-	private int localCursor;
-	private List<byte[]> buffer;
+	protected int localCursor;
+	protected List<byte[]> buffer;
 
 	public ScanIterator(Redis redis, byte[]operation, byte[] keyName) {
 		this.redis = redis;
