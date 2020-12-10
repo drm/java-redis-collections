@@ -8,11 +8,26 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class IntegrationTest {
 	private final String keyName = IntegrationTest.class.getCanonicalName();
@@ -306,5 +321,41 @@ public class IntegrationTest {
 
 		assertEquals(0, secondary.size());
 		assertTrue(secondary.isEmpty());
+	}
+
+	@Test
+	public void testSerializedMappedSetForInForEach() throws IOException {
+		Map<String, Set<String>> map = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, keyName);
+		map.clear();
+
+		map.get("A").add("1");
+		map.get("A").add("2");
+		map.get("A").add("3");
+		map.get("B").add("1");
+		map.get("B").add("2");
+		map.get("B").add("3");
+
+		Set<String> pairs = new HashSet<>();
+		Set<String> pairs2 = new HashSet<>();
+
+		for (Entry<String, Set<String>> entry : map.entrySet()) {
+			for (String s : entry.getValue()) {
+				pairs.add(entry.getKey() + "." + s);
+			}
+		}
+
+		map.forEach((k, v) -> {
+			v.forEach(s -> {
+				pairs2.add(k + "." + s);
+			});
+		});
+
+		Assert.assertEquals(6, pairs.size());
+		for (String expected : new String[]{"A.1", "A.2", "A.3", "B.1", "B.2", "B.3",}) {
+			Assert.assertTrue(pairs.contains(expected));
+			Assert.assertTrue(pairs2.contains(expected));
+		}
+
+		map.clear();
 	}
 }
