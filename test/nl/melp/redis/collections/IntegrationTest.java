@@ -344,11 +344,7 @@ public class IntegrationTest {
 			}
 		}
 
-		map.forEach((k, v) -> {
-			v.forEach(s -> {
-				pairs2.add(k + "." + s);
-			});
-		});
+		map.forEach((k, v) -> v.forEach(s -> pairs2.add(k + "." + s)));
 
 		Assert.assertEquals(6, pairs.size());
 		for (String expected : new String[]{"A.1", "A.2", "A.3", "B.1", "B.2", "B.3",}) {
@@ -357,5 +353,15 @@ public class IntegrationTest {
 		}
 
 		map.clear();
+	}
+
+
+	@Test
+	public void testSerializedMappedSetKeySynchronization() throws IOException {
+		Map<String, Set<String>> map = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, keyName);
+		Assert.assertEquals(0, map.get("A").size());
+		Assert.assertEquals(0, map.size());
+		map.remove("A");
+		Assert.assertEquals(0, map.size());
 	}
 }

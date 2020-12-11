@@ -7,6 +7,36 @@ import java.util.*;
 import java.util.Collection;
 
 public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
+	private class SerializedMemberSet extends SerializedSet<V> {
+		private final K key;
+
+		public SerializedMemberSet(K key, ISerializer<V> serializer, Redis redis, String keyName) {
+			super(serializer, redis, keyName);
+			this.key = key;
+
+			if (size() > 0) {
+				keys.add(key);
+			}
+		}
+
+		@Override
+		public void clear() {
+			super.clear();
+			keys.remove(key);
+			cache.remove(key);
+		}
+
+		@Override
+		public boolean remove(Object o) {
+			boolean removed = super.remove(o);
+			if (removed && size() == 0) {
+				keys.remove(key);
+				cache.remove(key);
+			}
+			return removed;
+		}
+	}
+
 	private final byte[] prefix;
 	private final int prefixLength;
 
@@ -74,9 +104,8 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 		synchronized (redis) {
 			K key = (K)o;
 
-			this.keys.add(key);
 			if (!this.cache.containsKey(key)) {
-				this.cache.put(key, new SerializedSet<>(this.valueSerializer, this.redis, new String(this.withPrefix(this.keySerializer.serialize(key)))));
+				this.cache.put(key, new SerializedMemberSet(key, this.valueSerializer, this.redis, new String(this.withPrefix(this.keySerializer.serialize(key)))));
 			}
 			return this.cache.get(o);
 		}
@@ -96,6 +125,8 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 	public Set<V> remove(Object o) {
 		synchronized (redis) {
 			Set<V> vs = this.get(o);
+			keys.remove(o);
+			cache.remove(o);
 			vs.clear();
 			return vs;
 		}
