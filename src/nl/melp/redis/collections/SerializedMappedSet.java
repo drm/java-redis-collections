@@ -20,6 +20,27 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 		}
 
 		@Override
+		public boolean addAll(Collection<? extends V> collection) {
+			keys.add(key);
+			return super.addAll(collection);
+		}
+
+		@Override
+		public boolean removeAll(Collection<?> collection) {
+			boolean ret = super.removeAll(collection);
+			if (ret && size() == 0) {
+				keys.remove(key);
+			}
+			return ret;
+		}
+
+		@Override
+		public boolean add(V o) {
+			keys.add(key);
+			return super.add(o);
+		}
+
+		@Override
 		public void clear() {
 			super.clear();
 			keys.remove(key);
@@ -66,17 +87,6 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 		System.arraycopy(value, 0, prefixedValue, prefixLength + 1, value.length);
 		prefixedValue[prefixLength] = ':';
 		return prefixedValue;
-	}
-
-	private <T> T call(String command, byte[]... args) {
-		byte[][] rawArgs = new byte[args.length + 1][];
-		rawArgs[0] = command.getBytes();
-		System.arraycopy(args, 0, rawArgs, 1, args.length);
-		try {
-			return redis.call((Object[])rawArgs);
-		} catch (IOException e) {
-			throw new UnsupportedOperationException(e);
-		}
 	}
 
 	@Override
@@ -140,10 +150,19 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 	@Override
 	public void clear() {
 		synchronized (redis) {
-			for (K key : keys) {
-				this.get(key).clear();
+			byte[] copy = new byte[prefixLength + 2];
+			System.arraycopy(prefix, 0, copy, 0, prefixLength);
+			copy[prefixLength] = ':';
+			copy[prefixLength + 1] = '*';
+			Iterator<byte[]> i = new ScanIterator(redis, "SCAN".getBytes(), copy, null);
+
+			while (i.hasNext()) {
+				try {
+					redis.call("DEL", i.next());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
-			keys.clear();
 		}
 	}
 

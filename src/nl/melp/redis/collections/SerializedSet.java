@@ -5,9 +5,11 @@ import nl.melp.redis.Redis;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class SerializedSet<V> implements Set<V>, Collection<V> {
@@ -40,7 +42,7 @@ public class SerializedSet<V> implements Set<V>, Collection<V> {
 
 	@Override
 	public boolean addAll(java.util.Collection<? extends V> collection) {
-		return innerSet.addAll(collection.stream().map(serializer::serialize).collect(Collectors.toList()));
+		return innerSet.addAll(collection.stream().map(serializer::serialize).collect(Collectors.toSet()));
 	}
 
 	@Override
@@ -81,7 +83,12 @@ public class SerializedSet<V> implements Set<V>, Collection<V> {
 
 	@Override
 	public boolean containsAll(Collection<?> collection) {
-		throw new UnsupportedOperationException("Not implemented");
+		for (Object item : collection) {
+			if (!contains(item)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override
@@ -91,7 +98,13 @@ public class SerializedSet<V> implements Set<V>, Collection<V> {
 
 	@Override
 	public boolean removeAll(Collection<?> collection) {
-		throw new UnsupportedOperationException("Not implemented");
+		AtomicBoolean b = new AtomicBoolean(false);
+		collection.forEach(item -> {
+			if (this.remove(item)) {
+				b.set(true);
+			}
+		});
+		return b.get();
 	}
 
 	@Override

@@ -359,9 +359,30 @@ public class IntegrationTest {
 	@Test
 	public void testSerializedMappedSetKeySynchronization() throws IOException {
 		Map<String, Set<String>> map = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, keyName);
+		Map<String, Set<String>> secondary = new SerializedMappedSet<>(Serializers.of(String.class), Serializers.of(String.class), redis, keyName);
+
 		Assert.assertEquals(0, map.get("A").size());
+		Assert.assertEquals(0, secondary.get("A").size());
 		Assert.assertEquals(0, map.size());
-		map.remove("A");
+		Assert.assertEquals(0, secondary.size());
+		map.get("A").add("foo");
+		Assert.assertEquals(1, map.size());
+		Assert.assertEquals(1, secondary.size());
+		map.get("A").remove("foo");
 		Assert.assertEquals(0, map.size());
+		Assert.assertEquals(0, secondary.size());
+		map.get("A").addAll(new HashSet<String>(){{ add ("foo"); add("bar"); }});
+		Assert.assertEquals(1, map.size());
+		Assert.assertEquals(1, secondary.size());
+		map.get("A").removeAll(new HashSet<String>(){{ add ("foo"); add("bar"); }});
+		Assert.assertEquals(0, map.size());
+		Assert.assertEquals(0, secondary.size());
+
+		map.get("A").addAll(new HashSet<String>(){{ add ("foo"); add("bar"); }});
+		map.clear();
+
+		Assert.assertEquals(0, map.size());
+		Assert.assertEquals(0, secondary.size());
+
 	}
 }

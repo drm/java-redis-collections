@@ -4,22 +4,30 @@ import nl.melp.redis.Redis;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 public class ScanIterator implements Iterator<byte[]> {
 	private final Redis redis;
 	private final byte[] operation;
 	private final byte[] keyName;
+	private final byte[] match;
 	private int cursor;
 	protected int localCursor;
 	protected List<byte[]> buffer;
 
 	public ScanIterator(Redis redis, byte[]operation, byte[] keyName) {
+		this(redis, operation, null, keyName);
+	}
+
+
+	public ScanIterator(Redis redis, byte[]operation, byte[] match, byte[] keyName) {
 		this.redis = redis;
 		this.operation = operation;
 		this.keyName = keyName;
 		this.cursor = 0;
 		this.localCursor = 0;
+		this.match = match;
 	}
 
 
@@ -32,8 +40,18 @@ public class ScanIterator implements Iterator<byte[]> {
 			}
 			try {
 				List<Object> result;
+				List<Object> args = new LinkedList<>();
+				args.add(this.operation);
+				if (keyName != null) {
+					args.add(this.keyName);
+				}
+				args.add(Integer.toString(this.cursor));
+				if (match != null) {
+					args.add("MATCH");
+					args.add(match);
+				}
 				synchronized (redis) {
-					result = redis.call(this.operation, this.keyName, Integer.toString(this.cursor));
+					result = redis.call(args.toArray());
 				}
 				this.cursor = Integer.valueOf(new String((byte[]) result.get(0)));
 				this.buffer = (List<byte[]>) result.get(1);
