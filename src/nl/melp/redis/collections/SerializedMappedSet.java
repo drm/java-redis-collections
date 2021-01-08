@@ -150,11 +150,11 @@ public class SerializedMappedSet<K, V> implements Map<K, Set<V>> {
 	@Override
 	public void clear() {
 		synchronized (redis) {
-			byte[] copy = new byte[prefixLength + 2];
-			System.arraycopy(prefix, 0, copy, 0, prefixLength);
-			copy[prefixLength] = ':';
-			copy[prefixLength + 1] = '*';
-			Iterator<byte[]> i = new ScanIterator(redis, "SCAN".getBytes(), copy, null);
+			byte[] prefix = new byte[prefixLength + 2];
+			System.arraycopy(this.prefix, 0, prefix, 0, prefixLength);
+			prefix[prefixLength] = ':';
+			prefix[prefixLength + 1] = '*';
+			Iterator<byte[]> i = new ScanIterator(redis, "SCAN".getBytes(), prefix, null);
 
 			while (i.hasNext()) {
 				try {

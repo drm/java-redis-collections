@@ -24,44 +24,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-public class IntegrationTest {
+public class IntegrationTest extends AbstractIntegrationTest {
 	private final String keyName = IntegrationTest.class.getCanonicalName();
-	private Redis redis;
-	private Socket socket;
-
-	@Test
-	public void tmp () throws IOException {
-		redis.call("SELECT", "0");
-		System.out.println(
-			new SerializedHashMap<>(redis, "nl.melp.linkchecker.LinkChecker.report.statuses").keySet().size()
-		);
-	}
-
-	@Before
-	public void init() throws IOException {
-		socket = new Socket("localhost", 6379);
-		redis = new Redis(socket);
-		redis.call("SELECT", "15");
-		Assert.assertEquals("Refusing to run on non-empty database", 0, ((List<?>) redis.call("KEYS", "*")).size());
-	}
-
-	@After
-	public void cleanup() throws IOException {
-		int size = ((List<?>) redis.call("KEYS", "*")).size();
-		redis.call("QUIT");
-		if (!socket.isClosed()) {
-			socket.close();
-		}
-		if (size > 0) {
-			Assert.fail("This test is littering");
-		}
-	}
-
 
 	@Test
 	public void testList() throws IOException {
@@ -293,8 +262,8 @@ public class IntegrationTest {
 		assertTrue(values.get("foo").contains("bar"));
 		assertTrue(secondary.get("foo").contains("bar"));
 		values.get("foo").remove("bar");
-		assertEquals(1, values.size());
-		assertEquals(1, secondary.size());
+		assertEquals(0, values.size());
+		assertEquals(0, secondary.size());
 		values.clear();
 		assertEquals(0, values.size());
 		assertEquals(0, secondary.size());
@@ -383,6 +352,5 @@ public class IntegrationTest {
 
 		Assert.assertEquals(0, map.size());
 		Assert.assertEquals(0, secondary.size());
-
 	}
 }

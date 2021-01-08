@@ -3,6 +3,7 @@ package nl.melp.redis.collections;
 import nl.melp.redis.Redis;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,8 +21,11 @@ public class ScanIterator implements Iterator<byte[]> {
 		this(redis, operation, null, keyName);
 	}
 
-
 	public ScanIterator(Redis redis, byte[]operation, byte[] match, byte[] keyName) {
+		this(redis, 1000, operation, match, keyName);
+	}
+
+	public ScanIterator(Redis redis, int bufferSize, byte[]operation, byte[] match, byte[] keyName) {
 		this.redis = redis;
 		this.operation = operation;
 		this.keyName = keyName;
@@ -29,7 +33,6 @@ public class ScanIterator implements Iterator<byte[]> {
 		this.localCursor = 0;
 		this.match = match;
 	}
-
 
 	@Override
 	public boolean hasNext() {
@@ -40,21 +43,26 @@ public class ScanIterator implements Iterator<byte[]> {
 			}
 			try {
 				List<Object> result;
-				List<Object> args = new LinkedList<>();
+				List<Object> args = new ArrayList<>();
 				args.add(this.operation);
 				if (keyName != null) {
 					args.add(this.keyName);
 				}
-				args.add(Integer.toString(this.cursor));
+				int cursorPos = args.size();
+				args.add(null);
 				if (match != null) {
 					args.add("MATCH");
 					args.add(match);
 				}
-				synchronized (redis) {
-					result = redis.call(args.toArray());
-				}
-				this.cursor = Integer.valueOf(new String((byte[]) result.get(0)));
-				this.buffer = (List<byte[]>) result.get(1);
+				do {
+					args.set(cursorPos, Integer.toString(this.cursor));
+					synchronized (redis) {
+						result = redis.call(args.toArray());
+					}
+					this.cursor = Integer.parseInt(new String((byte[]) result.get(0)));
+					this.buffer = (List<byte[]>) result.get(1);
+					// skip over empty pages
+				} while (this.cursor != 0 && this.buffer.size() == 0);
 				this.localCursor = 0;
 			} catch (IOException e) {
 				e.printStackTrace();
